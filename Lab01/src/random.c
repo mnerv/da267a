@@ -2,8 +2,12 @@
 
 #include "esp_system.h"
 
-int32_t get_random_secs(int32_t min, int32_t max) {
-	const uint32_t value = esp_random() % max;
+uint32_t rand_range(uint32_t min, uint32_t max) {
+	uint32_t value = esp_random() % max;
 	return value > min ? value : min;
+}
+
+uint32_t rand_max(uint32_t max) {
+	return esp_random() % max;
 }
 

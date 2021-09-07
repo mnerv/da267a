@@ -1,3 +1,11 @@
+/**
+ * @file   main.c
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Reaction game implementation with two buttons and two LEDs.
+ * @date   2021-09-08
+ *
+ * @copyright Copyright (c) 2021
+ */
 #include <stdint.h>
 
 #include "driver/gpio.h"
@@ -39,21 +47,22 @@ void app_main() {
 
 		// TODO: Switch off both A and B and wiat for some time to restart the game
 	}
+
 }
 
 //void app_main() {
 //	init_pins();
 //
 //	for (;;) {
-//		int32_t value = get_random_secs(100, 500);
+//		int32_t value = getrandom_secs(100, 500);
 //		printf("Random value: %d\n", value);
 //
-//		set_led_a(1);
-//		set_led_b(0);
+//		setled_a(1);
+//		setled_b(0);
 //		wait_ms(value);
 //
-//		set_led_a(0);
-//		set_led_b(1);
+//		setled_a(0);
+//		setled_b(1);
 //		wait_ms(value);
 //	}
 //}
@@ -62,19 +71,19 @@ void app_main() {
 //	init_pins();
 //
 //	for (;;) {
-//		if (is_button_a_pressed()) {
-//			set_led_a(1);
-//			set_led_b(0);
-//		} else if (is_button_b_pressed()) {
-//			set_led_a(0);
-//			set_led_b(1);
+//		if (isbutton_a_pressed()) {
+//			setled_a(1);
+//			setled_b(0);
+//		} else if (isbutton_b_pressed()) {
+//			setled_a(0);
+//			setled_b(1);
 //		} else {
-//			set_led_a(1);
-//			set_led_b(0);
+//			setled_a(1);
+//			setled_b(0);
 //			wait_ms(500);
 //
-//			set_led_a(0);
-//			set_led_b(1);
+//			setled_a(0);
+//			setled_b(1);
 //			wait_ms(500);
 //		}
 //	}
