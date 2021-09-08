@@ -24,6 +24,10 @@ void wait_ms(uint32_t ms) {
 	vTaskDelay(delay);
 }
 
+uint32_t time_ms() {
+	return xTaskGetTickCount() * portTICK_PERIOD_MS;
+}
+
 void start_animation() {
 	for (int32_t i = 0; i < 3; i++) {
 		setled_a(1);
@@ -75,13 +79,22 @@ void app_main() {
 		uint32_t wait_dur = rand_range(3000, 5000);
 
 		// Wait with random duration
-		wait_ms(wait_dur);
+		uint8_t winner      = 0;
+		uint32_t start_time = time_ms();
+		while (time_ms() - start_time < wait_dur) {
+			if (isbutton_a_pressed()) {
+				winner  = PLAYER_B;
+				break;
+			}
+			if (isbutton_b_pressed()) {
+				winner  = PLAYER_A;
+				break;
+			}
+		}
 
 		// Switch both LEDs ON
 		setled_a(1);
 		setled_b(1);
-
-		uint8_t winner = 0;
 
 		while (!winner) {
 			// Check if either button A or B are presseed
