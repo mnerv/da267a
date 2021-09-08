@@ -15,77 +15,94 @@
 #include "pins.h"
 #include "random.h"
 
+#define PLAYER_A       1
+#define PLAYER_B       2
+#define UNKNOWN_PLAYER 0
+
 void wait_ms(uint32_t ms) {
 	TickType_t delay = ms / portTICK_PERIOD_MS;
 	vTaskDelay(delay);
+}
+
+void start_animation() {
+	for (int32_t i = 0; i < 3; i++) {
+		setled_a(1);
+		setled_b(0);
+		wait_ms(500);
+		setled_a(0);
+		setled_b(1);
+		wait_ms(500);
+	}
+	for (int32_t i = 0; i < 6; i++) {
+		setled_a(1);
+		setled_b(1);
+		wait_ms(250);
+		setled_a(0);
+		setled_b(0);
+		wait_ms(250);
+	}
+}
+
+void winner_animation(uint8_t winner) {
+	if (winner == UNKNOWN_PLAYER) return;
+	for (int32_t i = 0; i < 5; i++) {
+		if (winner == PLAYER_A) {
+			setled_a(1);
+			setled_b(0);
+		} else if (winner == PLAYER_B) {
+			setled_a(0);
+			setled_b(1);
+		}
+		wait_ms(125);
+		setled_a(0);
+		setled_b(0);
+		wait_ms(125);
+	}
 }
 
 void app_main() {
 	init_pins();
 
 	for (;;) {
-		// TODO: Signal for game to start
+		// Signal for game to start
+		start_animation();
 
-		// TODO: Switch both LEDs off
+		// Switch both LEDs off
+		setled_a(0);
+		setled_b(0);
 
-		// TODO: Get random duration between 3 and 5 seconds
+		// Get random duration between 3 and 5 seconds
+		uint32_t wait_dur = rand_range(3000, 5000);
 
-		// TODO: Wait with random duration
+		// Wait with random duration
+		wait_ms(wait_dur);
 
-		// TODO: Switch both LEDs ON
+		// Switch both LEDs ON
+		setled_a(1);
+		setled_b(1);
 
 		uint8_t winner = 0;
 
 		while (!winner) {
-			// TODO: Check if either button A or B are presseed
-
-			// TODO: If any is pressed, set winner to 1 for A and 2 for B
+			// Check if either button A or B are presseed
+			// If any is pressed, set winner to 1 for A and 2 for B
+			if (isbutton_a_pressed()) {
+				winner = PLAYER_A;
+				break;
+			}
+			if (isbutton_b_pressed()) {
+				winner = PLAYER_B;
+				break;
+			}
 		}
 
-		// TODO: If A wins, flash LED A and switch off B
-		// TODO: If B wins, flash LED A and switch off A
-
-		// TODO: Switch off both A and B and wiat for some time to restart the game
+		// Winner animation
+		winner_animation(winner);
+		// Switch off both A and B and wiat for some time to restart the game
+		setled_a(0);
+		setled_b(0);
+		wait_ms(2000);
 	}
 
 }
-
-//void app_main() {
-//	init_pins();
-//
-//	for (;;) {
-//		int32_t value = getrandom_secs(100, 500);
-//		printf("Random value: %d\n", value);
-//
-//		setled_a(1);
-//		setled_b(0);
-//		wait_ms(value);
-//
-//		setled_a(0);
-//		setled_b(1);
-//		wait_ms(value);
-//	}
-//}
-
-//void app_main() {
-//	init_pins();
-//
-//	for (;;) {
-//		if (isbutton_a_pressed()) {
-//			setled_a(1);
-//			setled_b(0);
-//		} else if (isbutton_b_pressed()) {
-//			setled_a(0);
-//			setled_b(1);
-//		} else {
-//			setled_a(1);
-//			setled_b(0);
-//			wait_ms(500);
-//
-//			setled_a(0);
-//			setled_b(1);
-//			wait_ms(500);
-//		}
-//	}
-//}
 
