@@ -19,11 +19,21 @@
 #define PLAYER_B       2
 #define UNKNOWN_PLAYER 0
 
+/*!
+ * Wait in ms.
+ *
+ * @param ms Amount of time to wait in ms.
+ */
 void wait_ms(uint32_t ms) {
 	TickType_t delay = ms / portTICK_PERIOD_MS;
 	vTaskDelay(delay);
 }
 
+/*!
+ * Get current time since start in ms.
+ *
+ * @return time since start in ms.
+ */
 uint32_t time_ms() {
 	return xTaskGetTickCount() * portTICK_PERIOD_MS;
 }
