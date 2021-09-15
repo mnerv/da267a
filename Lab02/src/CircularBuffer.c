@@ -36,7 +36,8 @@ int32_t CircularBufferRemoveValue(CircularBuffer* buffer, int32_t value) {
 	while(it != buffer->tail) {
 		if (buffer->data[it] == value) {
 			count++;
-			buffer->data[it] = buffer->data[(it + 1) % buffer->maxLength];
+			for (int32_t i = it; i != buffer->tail; i = (i + 1) % buffer->maxLength)
+				buffer->data[i] = buffer->data[i];
 		}
 		it = (it + 1) % buffer->maxLength;
 	}

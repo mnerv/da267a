@@ -183,11 +183,15 @@ void TestCircularBufferAddElement() {
 	InitCircularBuffer(&buffer, data, 4);
 
 	CircularBufferAddElement(&buffer, 4);
-	TEST_ASSERT(buffer.tail == 1, "\tTest Add element, expect tail to be %d, got %d ", 1, buffer.tail);
+	TEST_ASSERT(buffer.tail == 1,
+			"\tTest Add element, expect tail to be %d, got %d ",
+			1, buffer.tail);
 	CircularBufferRemoveHead(&buffer);
 
 	CircularBufferAddElement(&buffer, 6);
-	TEST_ASSERT(buffer.tail == 2, "\tTest Add element, expect tail to be %d, got %d ", 2, buffer.tail);
+	TEST_ASSERT(buffer.tail == 2,
+			"\tTest Add element, expect tail to be %d, got %d ",
+			2, buffer.tail);
 
 	CircularBufferAddElement(&buffer, 8);
 	TEST_ASSERT(buffer.head == 1 && buffer.tail == 3,
