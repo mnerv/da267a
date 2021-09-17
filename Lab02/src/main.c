@@ -33,7 +33,11 @@ void sleep_ms(uint32_t ms) {
 	vTaskDelay(delay);
 }
 
+//
 // Black Box 01
+//
+// Add one element and remove one
+// chech if the remove and add are the same.
 void TestAddAndRemoveElement() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -44,7 +48,12 @@ void TestAddAndRemoveElement() {
 	TEST_ASSERT(add == remove, "\tTest Add and Remove from buffer");
 }
 
+//
 // Black Box 02
+//
+// Add 2 different value into the buffer
+// Remove the 2 element
+// Check if the 2 removed are in the same order as added.
 void TestAddTwoDifferentValue() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -59,7 +68,11 @@ void TestAddTwoDifferentValue() {
 	TEST_ASSERT(add02 == remove02, "\tTest Add 2 and Remove 2");
 }
 
+//
 // Black Box 03
+//
+// Add value to full buffer
+// Remove and test if the added value are in the same order as added.
 void TestAddAllAndDequeueIsSameOrder() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -74,7 +87,13 @@ void TestAddAllAndDequeueIsSameOrder() {
 	}
 }
 
+//
 // Black Box 04
+//
+// Add to full buffer.
+// Add another element.
+// Check if the last added value failed to be add.
+// The return value of the CircularBufferAddElement should return INT32_T.
 void TestAddAllCheckForLastFail() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -87,7 +106,12 @@ void TestAddAllCheckForLastFail() {
 	TEST_ASSERT(INT32_MIN == res, "\tTest add last, expect %d, got %d ", INT32_MIN, res);
 }
 
+//
 // Black Box 05
+//
+// Add to full buffer.
+// Remove element and check order.
+// Pass if the same order
 void TestAddRemoveInOrder() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -102,7 +126,11 @@ void TestAddRemoveInOrder() {
 	}
 }
 
+//
 // Black Box 06
+//
+// Check CircularBufferContains on an empty buffer.
+// Should return INT32_T.
 void TestContains() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -112,7 +140,12 @@ void TestContains() {
 	TEST_ASSERT(res == INT32_MIN, "\tTest contain on empty buffer, expect %d, got %d ", INT32_MIN, res);
 }
 
+//
 // Black Box 07
+//
+// Add one element.
+// Use CircularBufferContains to check if the added element is there.
+// Pass if the function return the same value as added.
 void TestAddContains() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -125,7 +158,12 @@ void TestAddContains() {
 	TEST_ASSERT(add == contain, "\tTest Add and contain, expect %d, got %d ", valueToAdd, contain);
 }
 
+//
 // Black Box 08
+//
+// Add 2 element.
+// Use CircularBufferContains to check for the second element.
+// Pass if function return the same value as the second element.
 void TestAddTwoContainSecond() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
@@ -140,7 +178,12 @@ void TestAddTwoContainSecond() {
 	TEST_ASSERT(contain == valueToAdd2, "\tTest Add Two and Contain second value, expect %d, got %d ", valueToAdd2, contain);
 }
 
+//
 // Black Box 09
+//
+// Add full buffer with different value.
+// Check if the last value exist.
+// Pass if exist.
 void TestAddBufferSizeDifferentCheckLast() {
 	int32_t data[BUFFER_SIZE];
 	CircularBuffer buffer;
