@@ -8,10 +8,10 @@
 
 `neovim/nvim-lspconfig` with `ccls` lsp engine
 
-Generate `compile_command.json` and `.ccls` with this commmand
+Generate `.ccls` with this commmand
 
 ```
-pio init --ide emacs
+pio init --ide vim
 ```
 
 ## Visual Studio Code
