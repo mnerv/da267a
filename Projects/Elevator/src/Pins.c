@@ -12,7 +12,6 @@ uint8_t InitPins() {
     gpio_config_t config;
     config.pin_bit_mask  = (uint64_t) 1 << PIN_A;
     config.pin_bit_mask |= (uint64_t) 1 << PIN_B;
-    config.pin_bit_mask |= (uint64_t) 1 << PIN_C;
 
     config.mode          = GPIO_MODE_DEF_INPUT;
     config.pull_down_en  = 0;
@@ -25,8 +24,5 @@ uint8_t ReadButtonA() {
 }
 uint8_t ReadButtonB() {
     return gpio_get_level(PIN_B);
-}
-uint8_t ReadButtonC() {
-    return gpio_get_level(PIN_C);
 }
 
