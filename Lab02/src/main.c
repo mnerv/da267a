@@ -78,12 +78,17 @@ void TestAddAllAndDequeueIsSameOrder() {
 	CircularBuffer buffer;
 	InitCircularBuffer(&buffer, data, BUFFER_SIZE);
 
-	for(int32_t i = 0; i < BUFFER_SIZE - 1; i++)
-		CircularBufferAddElement(&buffer, i);
+	int32_t const REPEATS = 3;
+	for (int32_t c = 0; c < REPEATS; c++) {
+		printf("\tRepeat %d\n", c + 1);
+		for(int32_t i = 0; i < BUFFER_SIZE - 1; i++)
+			CircularBufferAddElement(&buffer, i);
 
-	for(int32_t i = 0; i < BUFFER_SIZE - 1; i++) {
-		int32_t deq = CircularBufferRemoveHead(&buffer);
-		TEST_ASSERT(i == deq, "\tTest order, expect %d, got %d", deq, i);
+		for(int32_t i = 0; i < BUFFER_SIZE - 1; i++) {
+			int32_t deq = CircularBufferRemoveHead(&buffer);
+			TEST_ASSERT(i == deq, "\tTest order, expect %d, got %d", deq, i);
+		}
+		printf("\n");
 	}
 }
 
