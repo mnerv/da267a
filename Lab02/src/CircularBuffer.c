@@ -27,7 +27,7 @@ int32_t CircularBufferAddElement(CircularBuffer* buffer, int32_t value) {
 	if (tail == buffer->head)
 		return INT32_MIN;
 	buffer->data[buffer->tail] = value;
-	buffer->tail = (buffer->tail + 1) % buffer->maxLength;
+	buffer->tail = tail;
 	return value;
 }
 int32_t CircularBufferRemoveValue(CircularBuffer* buffer, int32_t value) {
