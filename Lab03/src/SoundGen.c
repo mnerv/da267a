@@ -30,7 +30,7 @@ uint32_t SoundGen_Start(uint32_t freq) {
 		SoundGen_Stop();
 		return UINT32_MAX;
 	}
-	return config.freq;
+	return (freq / 130) * 130;
 }
 void SoundGen_Stop() {
 	dac_cw_generator_disable();

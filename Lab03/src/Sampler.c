@@ -6,8 +6,8 @@
 #include "esp_timer.h"
 
 // Mid Trigger: 1024
-#define TRIGGER 1024
-#define SAMPLE_SIZE   16
+#define TRIGGER     1024
+#define SAMPLE_SIZE 16
 
 esp_timer_handle_t timer_handler;
 int32_t counter      = 0;
@@ -24,6 +24,8 @@ void callback(void* args) {
 }
 
 void Sampler_Start(int32_t freq) {
+	counter = 0;
+
 	// Setup ADC
 	adc_power_on();
 	adc_gpio_init(ADC_UNIT_1, (adc_channel_t)ADC1_GPIO36_CHANNEL);
@@ -41,7 +43,6 @@ void Sampler_Start(int32_t freq) {
 	ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &timer_handler));
 	int64_t const T = (int64_t)(1000000.f / ((float)freq));  // T = 1 / f, in microseconds
 
-	counter = 0;
 	ESP_ERROR_CHECK(esp_timer_start_periodic(timer_handler, T));
 	startTime = esp_timer_get_time();
 }
