@@ -21,12 +21,12 @@ uint32_t SoundGen_Start(uint32_t freq) {
 		.offset = 1
 	};
 	esp_err_t err = dac_cw_generator_config(&config);
-	if (err) return UINT32_MAX;
+	if (err != ESP_OK) return UINT32_MAX;
 
 	err = dac_cw_generator_enable();
-	if (err) return UINT32_MAX;
+	if (err != ESP_OK) return UINT32_MAX;
 	err = dac_output_enable(DAC_CHANNEL_1);
-	if (err) {
+	if (err != ESP_OK) {
 		SoundGen_Stop();
 		return UINT32_MAX;
 	}

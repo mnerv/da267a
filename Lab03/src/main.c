@@ -16,40 +16,16 @@
 #include "Sampler.h"
 
 void app_main() {
-	uint32_t freq = 130;
-
-	int32_t current = esp_timer_get_time();
-	int32_t last    = current;
-
 	for (;;) {
-		current = esp_timer_get_time();
-		if (current - last > 500) {
-			SoundGen_Start(freq);
-			freq += 10;
+		printf("Start sampling...\n");
+		Sampler_Start(6000);
+		vTaskDelay(pdMS_TO_TICKS(4000));
 
-			if (freq > 15000)
-				freq = 130;
-			last = current;
-		}
+		Sampler_Stop();
+		printf("Stop  sampling...\n");
 
-		//printf("Freq: %d\n", freq);
-		//vTaskDelay(pdMS_TO_TICKS(250));
-		//SoundGen_Stop();
-		//vTaskDelay(pdMS_TO_TICKS(250));
+		float freq = Sampler_GetFreq();
+		printf("Freq: %.2f\n", freq);
 	}
 }
-
-//void app_main() {
-//	for (;;) {
-//		printf("Start sampling...\n");
-//		Sampler_Start(6000);
-//		vTaskDelay(pdMS_TO_TICKS(1000));
-//
-//		Sampler_Stop();
-//		printf("Stop  sampling...\n");
-//
-//		float freq = Sampler_GetFreq();
-//		printf("Freq: %.2f\n", freq);
-//	}
-//}
 

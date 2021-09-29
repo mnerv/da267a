@@ -15,7 +15,7 @@ extern "C" {
 #include <stdint.h>
 
 /**
- * @brief  Play a sound with requested frequency.
+ * @brief  Play a sound with requested frequency
  * @param  freq Frequency in Hertz
  * @return Frequency that was set.
  */
