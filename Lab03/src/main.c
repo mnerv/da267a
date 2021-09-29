@@ -18,9 +18,9 @@
 void app_main() {
 	for (;;) {
 		printf("Start sampling...\n");
-		Sampler_Start(6000);
-		vTaskDelay(pdMS_TO_TICKS(4000));
+		Sampler_Start(1500);
 
+		vTaskDelay(pdMS_TO_TICKS(2000));
 		Sampler_Stop();
 		printf("Stop  sampling...\n");
 

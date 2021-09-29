@@ -5,18 +5,22 @@
 #include "soc/adc_channel.h"
 #include "esp_timer.h"
 
-#define SAMPLE_SIZE 16
+// Mid Trigger: 1024
+#define TRIGGER 1024
+#define SAMPLE_SIZE   16
 
-volatile uint16_t buffer[SAMPLE_SIZE];
 esp_timer_handle_t timer_handler;
+int32_t counter      = 0;
+int32_t lastSample   = 0;
+int32_t currSample   = 0;
+int64_t startTime    = 0;
+int64_t endTime      = 0;
 
 void callback(void* args) {
-	//for (int32_t i = 0; i < SAMPLE_SIZE; i++) {
-	//	int32_t adc = adc1_get_raw(ADC1_CHANNEL_0);
-	//	buffer[i] = adc;
-	//}
-	int32_t adc = adc1_get_raw(ADC1_CHANNEL_0);
-	printf("%d\n", adc);
+	lastSample = currSample;
+	currSample = adc1_get_raw(ADC1_CHANNEL_0);
+	if (lastSample < TRIGGER && currSample > TRIGGER)
+		counter++;
 }
 
 void Sampler_Start(int32_t freq) {
@@ -35,15 +39,18 @@ void Sampler_Start(int32_t freq) {
 		.name            = "sampler"
 	};
 	ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &timer_handler));
-	int64_t const T = (int64_t)(1000000. / ((double)freq * 2.));  // T = 1 / f, in microseconds
+	int64_t const T = (int64_t)(1000000.f / ((float)freq));  // T = 1 / f, in microseconds
+
+	counter = 0;
 	ESP_ERROR_CHECK(esp_timer_start_periodic(timer_handler, T));
+	startTime = esp_timer_get_time();
 }
 void Sampler_Stop() {
 	esp_timer_stop(timer_handler);
+	endTime = esp_timer_get_time();
 }
-
 float Sampler_GetFreq() {
-	// TODO: Compute the sampled values and return it
-	return 0.;
+	float freq = (float)counter / ((float)(endTime - startTime) / 1000000.);
+	return freq;
 }
 
