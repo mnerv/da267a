@@ -15,11 +15,11 @@ extern "C" {
 #include <stdint.h>
 
 /**
- * @brief Play a sound with requested frequency.
- * @param freq Requested frequency to play
- * @return 
+ * @brief  Play a sound with requested frequency.
+ * @param  freq Frequency in Hertz
+ * @return Frequency that was set.
  */
-int32_t SoundGen_Start(int32_t freq);
+uint32_t SoundGen_Start(uint32_t freq);
 void SoundGen_Stop();
 
 #ifdef __cplusplus

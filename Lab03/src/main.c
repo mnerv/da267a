@@ -12,10 +12,30 @@
 #include "esp32/rom/ets_sys.h"
 #include "esp_task_wdt.h"
 
+#include "SoundGen.h"
+#include "Sampler.h"
+
 void app_main() {
 	for (;;) {
-		printf("Hello, World!\n");
+		int32_t freq = SoundGen_Start(55000);
+		printf("Freq: %d\n", freq);
+		vTaskDelay(pdMS_TO_TICKS(250));
+		SoundGen_Stop();
 		vTaskDelay(pdMS_TO_TICKS(250));
 	}
 }
+
+//void app_main() {
+//	for (;;) {
+//		printf("Start sampling...\n");
+//		Sampler_Start(6000);
+//		vTaskDelay(pdMS_TO_TICKS(1000));
+//
+//		Sampler_Stop();
+//		printf("Stop  sampling...\n");
+//
+//		float freq = Sampler_GetFreq();
+//		printf("Freq: %.2f\n", freq);
+//	}
+//}
 
