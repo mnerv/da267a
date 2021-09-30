@@ -1,3 +1,12 @@
+/**
+ * @file   Sampler.c
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  Sample sound from ESP32 ADC with high resolution
+ *         timer interrupt callback.
+ * @date   2021-09-28
+ *
+ * @copyright Copyright (c) 2021
+ */
 #include "Sampler.h"
 
 #include "driver/gpio.h"
@@ -27,7 +36,6 @@ void Sampler_Start(int32_t freq) {
 	counter = 0;
 
 	// Setup ADC
-	adc_power_on();
 	adc_gpio_init(ADC_UNIT_1, (adc_channel_t)ADC1_GPIO36_CHANNEL);
 	adc1_config_width(ADC_WIDTH_12Bit);
 	adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);

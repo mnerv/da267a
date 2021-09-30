@@ -1,8 +1,8 @@
 /**
- * @file   pins.c
+ * @file   Pins.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
  * @brief  Pin initialisation implementation.
- * @date   2021-09-08
+ * @date   2021-09-29
  *
  * @copyright Copyright (c) 2021
  */
