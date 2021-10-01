@@ -19,13 +19,7 @@ extern "C" auto app_main() -> void;
 
 constexpr auto SAMPLE_SIZE = 256;
 
-void sleep_ms(uint32_t ms) {
-    TickType_t delay = ms / portTICK_PERIOD_MS;
-    vTaskDelay(delay);
-}
-
 auto app_main() -> void {
-    adc_power_on();
     adc_gpio_init(ADC_UNIT_1, static_cast<adc_channel_t>(ADC1_GPIO36_CHANNEL));
     adc1_config_width(ADC_WIDTH_12Bit);
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
@@ -39,9 +33,9 @@ auto app_main() -> void {
             samples[i] = adc;
         }
         for (int32_t i = 0; i < SAMPLE_SIZE; i++) {
-            printf("%d,%d\n", samples[i], samples[i] + 10);
+            printf("%d\n", samples[i]);
         }
-        pdMS_TO_TICKS(10);
+        vTaskDelay(pdMS_TO_TICKS(25));
     }
 }
 
