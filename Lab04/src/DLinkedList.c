@@ -1,4 +1,4 @@
-#include "DLinkList.h"
+#include "DLinkedList.h"
 #include <stdlib.h>
 
 void DLL_Init(DLinkedList* list) {

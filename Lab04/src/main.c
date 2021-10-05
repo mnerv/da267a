@@ -12,9 +12,9 @@
 #include "esp32/rom/ets_sys.h"
 #include "esp_task_wdt.h"
 
-#define TEST_ASSERT(test, ...) do { \
-	printf(__VA_ARGS__);            \
-	if (!(test)) {                  \
+#define TEST_ASSERT(test, ...) do {  \
+	printf(__VA_ARGS__);             \
+	if (!(test)) {                   \
 		printf("Assertion Failed: (%s), func %s, file %s, line %d\n", #test, __FUNCTION__, __FILE__, __LINE__); \
 	} else { printf("\tPassed\n"); }} while(0)
 #define TEST_RUN(test) do { printf("TEST: %s\n", #test); test(); } while(0)
@@ -22,13 +22,12 @@
 #include "SLinkedList.h"
 #include "DLinkedList.h"
 
-// TODO: BLACK BOX TEST for Singly Linked List
 void TEST_SLL_Init() {
 	SLinkedList list;
 	SLL_Init(&list);
 	int32_t ret = SLL_RemoveFirst(&list);
 	TEST_ASSERT(ret == INT32_MIN,
-	            "\tExpect return to be %d, got %d\n", INT32_MIN, ret);
+	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
 }
 void TEST_SLL_AddElement() {
 	SLinkedList list;
@@ -68,13 +67,12 @@ void TEST_SLL_RemoveLast() {
 }
 // TODO: WHITE BOX TEST for Singly Linked List
 
-// TODO: BLACK BOX TEST for Doubly Linked List
 void TEST_DLL_Init() {
 	DLinkedList list;
 	DLL_Init(&list);
 	int32_t ret = DLL_RemoveFirst(&list);
 	TEST_ASSERT(ret == INT32_MIN,
-	            "\tExpect return to be %d, got %d\n", INT32_MIN, ret);
+	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
 }
 void TEST_DLL_AddElement() {
 	DLinkedList list;
@@ -110,6 +108,28 @@ void TEST_DLL_RemoveLast() {
 // TODO: WHITE BOX TEST for Doubly Linked List
 
 void app_main() {
+	printf("Singly Linked List\n");
+	printf("-------------------\n");
+	printf(" BLACK BOX TEST\n");
+	printf(" ---------------\n");
 	TEST_RUN(TEST_SLL_Init);
+	TEST_RUN(TEST_SLL_AddElement);
+	TEST_RUN(TEST_SLL_RemoveFirst);
+	TEST_RUN(TEST_SLL_RemoveLast);
+	printf(" WHITE BOX TEST\n");
+	printf(" ---------------\n");
+
+	printf("\n");
+
+	printf("Doubly Linked List\n");
+	printf("-------------------\n");
+	printf(" BLACK BOX TEST\n");
+	printf(" ---------------\n");
+	TEST_RUN(TEST_DLL_Init);
+	TEST_RUN(TEST_DLL_AddElement);
+	TEST_RUN(TEST_DLL_RemoveFirst);
+	TEST_RUN(TEST_DLL_RemoveLast);
+	printf(" WHITE BOX TEST\n");
+	printf(" ---------------\n");
 }
 

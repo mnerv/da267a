@@ -2,7 +2,7 @@
  * @file   SLinkedList.h
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
  * @brief  Singly linked list
- * @date   2021-09-23
+ * @date   2021-10-05
  *
  * @copyright Copyright (c) 2021
  */
