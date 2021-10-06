@@ -6,12 +6,11 @@ void SLL_Init(SLinkedList* list) {
 	list->first = NULL;
 }
 void SLL_Clean(SLinkedList* list) {
-	if (list->first == NULL) return;
 	SLinkedListN* next = list->first;
-	while(next->next != NULL) {
-		SLinkedListN* cur = next;
-		next = next->next;
-		free(cur);
+	while(next != NULL) {
+		SLinkedListN* tmp = next->next;
+		free(next);
+		next = tmp;
 	}
 }
 int32_t SLL_AddNode(SLinkedList* list, int32_t value) {
@@ -33,7 +32,7 @@ int32_t SLL_AddNode(SLinkedList* list, int32_t value) {
 					cn->next = node;
 					break;
 				}
-				if (cn->data < node->data && cn->next->data > node->data) {
+				if (cn->data <= node->data && cn->next->data > node->data) {
 					SLinkedListN* tmp = cn->next;
 					cn->next = node;
 					node->next = tmp;
@@ -55,10 +54,16 @@ int32_t SLL_RemoveFirst(SLinkedList* list) {
 }
 int32_t SLL_RemoveLast(SLinkedList* list) {
 	if (list->first == NULL) return INT32_MIN;
-	SLinkedListN* tmp = list->first;
-	while(tmp->next != NULL) tmp = tmp->next;
-	int32_t value = tmp->data;
-	free(tmp);
+	SLinkedListN* cur = list->first;
+	SLinkedListN* pre = list->first;
+	while(cur->next != NULL) {
+		pre = cur;
+		cur = cur->next;
+	}
+	int32_t value = cur->data;
+	if (cur == list->first) list->first = NULL;
+	if (pre != NULL) pre->next = NULL;
+	free(cur);
 	return value;
 }
 

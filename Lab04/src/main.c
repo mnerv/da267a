@@ -37,6 +37,7 @@ void TEST_SLL_AddNode() {
 	TEST_ASSERT(ret == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
 	            insertVal, ret);
+
 	SLL_Clean(&list);
 }
 void TEST_SLL_RemoveFirst() {
@@ -47,9 +48,13 @@ void TEST_SLL_RemoveFirst() {
 	SLL_AddNode(&list, 3);
 	SLL_AddNode(&list, 4);
 	SLL_AddNode(&list, insertVal);
+	SLL_AddNode(&list, 3);
+
+	SLL_Print(&list);
+
 	int32_t remove = SLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == insertVal,
-	            "\tInsert value in list, expect return %d, got %d",
+	            "\tInsert values in list, expect return %d, got %d",
 	            insertVal, remove);
 
 	SLL_Clean(&list);
@@ -62,13 +67,12 @@ void TEST_SLL_RemoveLast() {
 	SLL_AddNode(&list, insertVal);
 	SLL_AddNode(&list, 3);
 	SLL_AddNode(&list, 6);
-	SLL_Print(&list);
 
 	int32_t remove = SLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
 	            "\tExpect last value to be %d, got %d", insertVal, remove);
 
-	//SLL_Clean(&list);
+	SLL_Clean(&list);
 }
 // TODO: WHITE BOX TEST for Singly Linked List
 
@@ -87,6 +91,8 @@ void TEST_DLL_AddNode() {
 	TEST_ASSERT(ret == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
 	            insertVal, ret);
+
+	DLL_Clean(&list);
 }
 void TEST_DLL_RemoveFirst() {
 	DLinkedList list;
@@ -96,13 +102,16 @@ void TEST_DLL_RemoveFirst() {
 	DLL_AddNode(&list, 1);
 	DLL_AddNode(&list, 3);
 	DLL_AddNode(&list, 2);
+	DLL_AddNode(&list, 3);
 
 	DLL_Print(&list);
 
 	int32_t remove = DLL_RemoveFirst(&list);
-	TEST_ASSERT(remove == insertVal,
-	            "\tInsert value in list, expect return %d, got %d",
-	            insertVal, remove);
+	TEST_ASSERT(remove == 1,
+	            "\tRemove first value, expect %d to be %d",
+	            1, remove);
+
+	DLL_Clean(&list);
 }
 void TEST_DLL_RemoveLast() {
 	DLinkedList list;
@@ -113,7 +122,9 @@ void TEST_DLL_RemoveLast() {
 
 	int32_t remove = DLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
-	            "\tExpect last value to be %d, got %d", insertVal, remove);
+	            "\tExpect last value %d to be %d", remove, insertVal);
+
+	DLL_Clean(&list);
 }
 // TODO: WHITE BOX TEST for Doubly Linked List
 

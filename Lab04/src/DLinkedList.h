@@ -31,6 +31,7 @@ struct DLinkedList {
 };
 
 void DLL_Init(DLinkedList* list);
+void DLL_Clean(DLinkedList* list);
 int32_t DLL_AddNode(DLinkedList* list, int32_t value);
 int32_t DLL_RemoveFirst(DLinkedList* list);
 int32_t DLL_RemoveLast(DLinkedList* list);
