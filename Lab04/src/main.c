@@ -15,7 +15,7 @@
 #define TEST_ASSERT(test, ...) do {  \
 	printf(__VA_ARGS__);             \
 	if (!(test)) {                   \
-		printf("Assertion Failed: (%s), func %s, file %s, line %d\n", #test, __FUNCTION__, __FILE__, __LINE__); \
+		printf(": Assertion Failed: (%s), func %s, file %s, line %d\n", #test, __FUNCTION__, __FILE__, __LINE__); \
 	} else { printf("\tPassed\n"); }} while(0)
 #define TEST_RUN(test) do { printf("TEST: %s\n", #test); test(); } while(0)
 
@@ -29,11 +29,11 @@ void TEST_SLL_Init() {
 	TEST_ASSERT(ret == INT32_MIN,
 	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
 }
-void TEST_SLL_AddElement() {
+void TEST_SLL_AddNode() {
 	SLinkedList list;
 	SLL_Init(&list);
 	int32_t const insertVal = 42;
-	int32_t ret = SLL_AddElement(&list, insertVal);
+	int32_t ret = SLL_AddNode(&list, insertVal);
 	TEST_ASSERT(ret == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
 	            insertVal, ret);
@@ -42,9 +42,11 @@ void TEST_SLL_AddElement() {
 void TEST_SLL_RemoveFirst() {
 	SLinkedList list;
 	SLL_Init(&list);
-	int32_t const insertVal = 42;
-	SLL_AddElement(&list, insertVal);
-	SLL_AddElement(&list, 1);
+	int32_t const insertVal = 1;
+	SLL_AddNode(&list, 2);
+	SLL_AddNode(&list, 3);
+	SLL_AddNode(&list, 4);
+	SLL_AddNode(&list, insertVal);
 	int32_t remove = SLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
@@ -56,14 +58,17 @@ void TEST_SLL_RemoveLast() {
 	SLinkedList list;
 	SLL_Init(&list);
 	int32_t const insertVal = 42;
-	SLL_AddElement(&list, 1);
-	SLL_AddElement(&list, insertVal);
+	SLL_AddNode(&list, 1);
+	SLL_AddNode(&list, insertVal);
+	SLL_AddNode(&list, 3);
+	SLL_AddNode(&list, 6);
+	SLL_Print(&list);
 
 	int32_t remove = SLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
 	            "\tExpect last value to be %d, got %d", insertVal, remove);
 
-	SLL_Clean(&list);
+	//SLL_Clean(&list);
 }
 // TODO: WHITE BOX TEST for Singly Linked List
 
@@ -74,11 +79,11 @@ void TEST_DLL_Init() {
 	TEST_ASSERT(ret == INT32_MIN,
 	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
 }
-void TEST_DLL_AddElement() {
+void TEST_DLL_AddNode() {
 	DLinkedList list;
 	DLL_Init(&list);
 	int32_t const insertVal = 42;
-	int32_t ret = DLL_AddElement(&list, insertVal);
+	int32_t ret = DLL_AddNode(&list, insertVal);
 	TEST_ASSERT(ret == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
 	            insertVal, ret);
@@ -87,8 +92,8 @@ void TEST_DLL_RemoveFirst() {
 	DLinkedList list;
 	DLL_Init(&list);
 	int32_t const insertVal = 42;
-	DLL_AddElement(&list, insertVal);
-	DLL_AddElement(&list, 1);
+	DLL_AddNode(&list, insertVal);
+	DLL_AddNode(&list, 1);
 	int32_t remove = DLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",
@@ -98,8 +103,8 @@ void TEST_DLL_RemoveLast() {
 	DLinkedList list;
 	DLL_Init(&list);
 	int32_t const insertVal = 42;
-	DLL_AddElement(&list, 1);
-	DLL_AddElement(&list, insertVal);
+	DLL_AddNode(&list, 1);
+	DLL_AddNode(&list, insertVal);
 
 	int32_t remove = DLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
@@ -113,7 +118,7 @@ void app_main() {
 	printf(" BLACK BOX TEST\n");
 	printf(" ---------------\n");
 	TEST_RUN(TEST_SLL_Init);
-	TEST_RUN(TEST_SLL_AddElement);
+	TEST_RUN(TEST_SLL_AddNode);
 	TEST_RUN(TEST_SLL_RemoveFirst);
 	TEST_RUN(TEST_SLL_RemoveLast);
 	printf(" WHITE BOX TEST\n");
@@ -126,7 +131,7 @@ void app_main() {
 	printf(" BLACK BOX TEST\n");
 	printf(" ---------------\n");
 	TEST_RUN(TEST_DLL_Init);
-	TEST_RUN(TEST_DLL_AddElement);
+	TEST_RUN(TEST_DLL_AddNode);
 	TEST_RUN(TEST_DLL_RemoveFirst);
 	TEST_RUN(TEST_DLL_RemoveLast);
 	printf(" WHITE BOX TEST\n");

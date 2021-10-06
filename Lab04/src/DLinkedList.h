@@ -15,23 +15,23 @@ extern "C" {
 #include <stdint.h>
 
 // Forward declarations
-typedef struct DLinkedListEl DLinkedListEl;
-typedef struct DLinkedList   DLinkedList;
+typedef struct DLinkedListN DLinkedListN;
+typedef struct DLinkedList  DLinkedList;
 
-struct DLinkedListEl {
+struct DLinkedListN {
 	int32_t data;
 
-	DLinkedListEl* prev;
-	DLinkedListEl* next;
+	DLinkedListN* prev;
+	DLinkedListN* next;
 };
 
 struct DLinkedList {
-	DLinkedListEl* first;
-	DLinkedListEl* last;
+	DLinkedListN* first;
+	DLinkedListN* last;
 };
 
 void DLL_Init(DLinkedList* list);
-int32_t DLL_AddElement(DLinkedList* list, int32_t value);
+int32_t DLL_AddNode(DLinkedList* list, int32_t value);
 int32_t DLL_RemoveFirst(DLinkedList* list);
 int32_t DLL_RemoveLast(DLinkedList* list);
 
