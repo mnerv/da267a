@@ -94,6 +94,11 @@ void TEST_DLL_RemoveFirst() {
 	int32_t const insertVal = 42;
 	DLL_AddNode(&list, insertVal);
 	DLL_AddNode(&list, 1);
+	DLL_AddNode(&list, 3);
+	DLL_AddNode(&list, 2);
+
+	DLL_Print(&list);
+
 	int32_t remove = DLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == insertVal,
 	            "\tInsert value in list, expect return %d, got %d",

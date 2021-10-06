@@ -27,33 +27,22 @@ int32_t SLL_AddNode(SLinkedList* list, int32_t value) {
 			node->next  = list->first;
 			list->first = node;
 		} else {
-			SLinkedListN* prpr = list->first;
-			SLinkedListN* pr = list->first;
 			SLinkedListN* cn = list->first;
 			while(cn != NULL) {
-				prpr = pr;
-				pr = cn;
-				cn = cn->next;
-			}
-			pr->next = node;
-
-			prpr = list->first;
-			pr   = list->first;
-			cn   = list->first;
-			while(cn != NULL) {
-				if (pr->data > cn->data) {
-					prpr->next = cn;
-					SLinkedListN* tmp = cn->next;
-					cn->next = pr;
-					pr->next = tmp;
+				if (cn->next == NULL) {
+					cn->next = node;
+					break;
 				}
-				prpr = pr;
-				pr = cn;
+				if (cn->data < node->data && cn->next->data > node->data) {
+					SLinkedListN* tmp = cn->next;
+					cn->next = node;
+					node->next = tmp;
+					break;
+				}
 				cn = cn->next;
 			}
 		}
 	}
-
 	return node->data;
 }
 int32_t SLL_RemoveFirst(SLinkedList* list) {
