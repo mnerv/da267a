@@ -18,28 +18,25 @@ int32_t SLL_AddNode(SLinkedList* list, int32_t value) {
 	if (node == NULL) return INT32_MIN;
 	node->next = NULL;
 	node->data = value;
-
-	if (list->first == NULL) {
+	if (list->first == NULL)
+		list->first = node;
+	else if (list->first->data > node->data) {
+		node->next  = list->first;
 		list->first = node;
 	} else {
-		if (list->first->data > node->data) {
-			node->next  = list->first;
-			list->first = node;
-		} else {
-			SLinkedListN* cn = list->first;
-			while(cn != NULL) {
-				if (cn->next == NULL) {
-					cn->next = node;
-					break;
-				}
-				if (cn->data <= node->data && cn->next->data > node->data) {
-					SLinkedListN* tmp = cn->next;
-					cn->next = node;
-					node->next = tmp;
-					break;
-				}
-				cn = cn->next;
+		SLinkedListN* cn = list->first;
+		while(cn != NULL) {
+			if (cn->next == NULL) {
+				cn->next = node;
+				break;
 			}
+			if (cn->data <= node->data && cn->next->data > node->data) {
+				SLinkedListN* tmp = cn->next;
+				cn->next = node;
+				node->next = tmp;
+				break;
+			}
+			cn = cn->next;
 		}
 	}
 	return node->data;
