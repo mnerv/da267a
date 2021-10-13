@@ -10,7 +10,7 @@ void I2C_Init(int32_t sda, int32_t scl) {
 		.scl_io_num       = scl,
 		.sda_pullup_en    = GPIO_PULLUP_ENABLE,
 		.scl_pullup_en    = GPIO_PULLUP_ENABLE,
-		.master.clk_speed = 100000
+		.master.clk_speed = 100000  // 100kHz
 	};
 	esp_err_t err = i2c_param_config(I2C_NUM_0, &config);
 	ESP_ERROR_CHECK(err);
@@ -50,8 +50,6 @@ void I2C_Read(uint8_t address, uint8_t reg, uint8_t* buffer, int32_t len) {
 	err = i2c_master_cmd_begin(I2C_NUM_0, cmd, RATE / portTICK_RATE_MS);
 	ESP_ERROR_CHECK(err);
 	i2c_cmd_link_delete(cmd);
-
-	vTaskDelay(pdMS_TO_TICKS(10));  // wait for some small time
 
 	cmd = i2c_cmd_link_create();
 	err = i2c_master_start(cmd);

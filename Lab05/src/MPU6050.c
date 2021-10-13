@@ -1,6 +1,6 @@
 #include "MPU6050.h"
 
-void HelloWorld() {
-
+void MPU6050_Init(uint8_t mpu6050Config) {
 }
+
 

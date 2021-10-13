@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-void HelloWorld();
+void MPU6050_Init(uint8_t mpu6050Config);
 
 #ifdef __cplusplus
 }
