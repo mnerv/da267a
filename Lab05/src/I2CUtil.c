@@ -1,3 +1,11 @@
+/**
+ * @file   I2CUtil.c
+ * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
+ * @brief  I2C implementation
+ * @date   2021-10-12
+ *
+ * @copyright Copyright (c) 2021
+ */
 #include "I2CUtil.h"
 #include "driver/i2c.h"
 
