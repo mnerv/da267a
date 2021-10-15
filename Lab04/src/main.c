@@ -22,12 +22,13 @@
 #include "SLinkedList.h"
 #include "DLinkedList.h"
 
+// Singly Linked List BLACK BOX TESTs
 void TEST_SLL_Init() {
 	SLinkedList list;
 	SLL_Init(&list);
 	int32_t ret = SLL_RemoveFirst(&list);
 	TEST_ASSERT(ret == INT32_MIN,
-	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
+	            "Expect return to be %d, got %d", INT32_MIN, ret);
 }
 void TEST_SLL_AddNode() {
 	SLinkedList list;
@@ -35,7 +36,7 @@ void TEST_SLL_AddNode() {
 	int32_t const insertVal = 42;
 	int32_t ret = SLL_AddNode(&list, insertVal);
 	TEST_ASSERT(ret == insertVal,
-	            "\tInsert value in list, expect return %d, got %d",
+	            "Insert value in list, expect return %d, got %d",
 	            insertVal, ret);
 
 	SLL_Clean(&list);
@@ -54,7 +55,7 @@ void TEST_SLL_RemoveFirst() {
 
 	int32_t remove = SLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == insertVal,
-	            "\tInsert values in list, expect return %d, got %d",
+	            "Insert values in list, expect return %d, got %d",
 	            insertVal, remove);
 
 	SLL_Clean(&list);
@@ -70,18 +71,43 @@ void TEST_SLL_RemoveLast() {
 
 	int32_t remove = SLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
-	            "\tExpect last value to be %d, got %d", insertVal, remove);
+	            "Expect last value to be %d, got %d", insertVal, remove);
 
 	SLL_Clean(&list);
 }
-// TODO: WHITE BOX TEST for Singly Linked List
+// Singly Linked List WHITE BOX TESTs
+void TEST_SLL_InitFirstNULL() {
+	SLinkedList list;
+	SLL_Init(&list);
+	TEST_ASSERT(list.first == NULL, "Expect first to be NULL (0): %p", list.first);
+}
+void TEST_SLL_AddNodes() {
+	SLinkedList list;
+	int32_t datas[] = {1, 2, 3, 3};
+	SLL_Init(&list);
+	SLL_AddNode(&list, 1);
+	SLL_AddNode(&list, 3);
+	SLL_AddNode(&list, 2);
+	SLL_AddNode(&list, 3);
+
+	SLinkedListN* node = list.first;
+	int32_t i = 0;
+	while(node != NULL) {
+		int32_t val = datas[i++];
+		TEST_ASSERT(node->data == val, "Expect %d to be %d", node->data, val);
+		node = node->next;
+	}
+	SLL_Print(&list);
+
+	SLL_Clean(&list);
+}
 
 void TEST_DLL_Init() {
 	DLinkedList list;
 	DLL_Init(&list);
 	int32_t ret = DLL_RemoveFirst(&list);
 	TEST_ASSERT(ret == INT32_MIN,
-	            "\tExpect return to be %d, got %d", INT32_MIN, ret);
+	            "Expect return to be %d, got %d", INT32_MIN, ret);
 }
 void TEST_DLL_AddNode() {
 	DLinkedList list;
@@ -89,7 +115,7 @@ void TEST_DLL_AddNode() {
 	int32_t const insertVal = 42;
 	int32_t ret = DLL_AddNode(&list, insertVal);
 	TEST_ASSERT(ret == insertVal,
-	            "\tInsert value in list, expect return %d, got %d",
+	            "Insert value in list, expect return %d, got %d",
 	            insertVal, ret);
 
 	DLL_Clean(&list);
@@ -104,11 +130,11 @@ void TEST_DLL_RemoveFirst() {
 	DLL_AddNode(&list, 2);
 	DLL_AddNode(&list, 3);
 
-	DLL_Print(&list);
+	DLL_Print(&list, stdout);
 
 	int32_t remove = DLL_RemoveFirst(&list);
 	TEST_ASSERT(remove == 1,
-	            "\tRemove first value, expect %d to be %d",
+	            "Remove first value, expect %d to be %d",
 	            1, remove);
 
 	DLL_Clean(&list);
@@ -122,9 +148,16 @@ void TEST_DLL_RemoveLast() {
 
 	int32_t remove = DLL_RemoveLast(&list);
 	TEST_ASSERT(remove == insertVal,
-	            "\tExpect last value %d to be %d", remove, insertVal);
+	            "Expect last value %d to be %d", remove, insertVal);
 
 	DLL_Clean(&list);
+}
+void TEST_DLL_InitFirstLastNULL() {
+	DLinkedList list;
+	DLL_Init(&list);
+
+	TEST_ASSERT(list.first == NULL && list.last == NULL,
+			"Expect first %p to be %p, last %p to be %p", list.first, NULL, list.last, NULL);
 }
 // TODO: WHITE BOX TEST for Doubly Linked List
 
@@ -139,6 +172,8 @@ void app_main() {
 	TEST_RUN(TEST_SLL_RemoveLast);
 	printf(" WHITE BOX TEST\n");
 	printf(" ---------------\n");
+	TEST_RUN(TEST_SLL_InitFirstNULL);
+	TEST_RUN(TEST_SLL_AddNodes);
 
 	printf("\n");
 
@@ -152,5 +187,6 @@ void app_main() {
 	TEST_RUN(TEST_DLL_RemoveLast);
 	printf(" WHITE BOX TEST\n");
 	printf(" ---------------\n");
+	TEST_RUN(TEST_DLL_InitFirstLastNULL);
 }
 

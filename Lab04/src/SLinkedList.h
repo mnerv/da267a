@@ -8,11 +8,12 @@
  */
 #ifndef SLINKEDLIST_H_
 #define SLINKEDLIST_H_
+
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
 
 // Forward declarations
 typedef struct SLinkedListN SLinkedListN;

@@ -32,7 +32,7 @@ int32_t SLL_AddNode(SLinkedList* list, int32_t value) {
 			}
 			if (cn->data <= node->data && cn->next->data > node->data) {
 				SLinkedListN* tmp = cn->next;
-				cn->next = node;
+				cn->next   = node;
 				node->next = tmp;
 				break;
 			}
