@@ -7,10 +7,10 @@
  * @copyright Copyright (c) 2021
  */
 #include <stdint.h>
+#include <math.h>
 
 #include "driver/gpio.h"
 #include "esp_task_wdt.h"
-#include "esp_sleep.h"
 #include "esp_pm.h"
 
 #include "I2CUtil.h"
@@ -19,7 +19,16 @@
 #define SDA_PIN 23
 #define SCL_PIN 22
 
-void task(void* arg) {
+#define SAMPLE_PERIOD  166  // ms
+#define COMPUTE_PERIOD 100  // ms
+#define BUFFER_SIZE    10
+
+// Step-Detection algorithm constant values
+#define MIN_SD          0  // Minimum Standard Deviation
+#define SD_K            0  // Standard deviation constant
+#define MIN_STEP_TIME   0  // Minimum time between each step
+
+void sample_task(void* args) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	MPU6050 mpu;
 	MPU6050_Config(MPU6050_PWR_MGMT_1, 0x00);
@@ -27,11 +36,28 @@ void task(void* arg) {
 	MPU6050_AccConfig(0x00);
 
 	for(;;) {
-		MPU6050_Update(&mpu);
-		// Print Acceleration data
-		printf("%.2f, %.2f, %.2f\n", mpu.accx, mpu.accy, mpu.accz);
-		ets_delay_us(500000);                                  // Work for 0.5 s
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));  // Sleep for 2s
+		MPU6050_Update(&mpu);  // Get accelerations
+		float mag = sqrtf(mpu.accx * mpu.accx +
+		                  mpu.accy * mpu.accy +
+		                  mpu.accz * mpu.accz);  // Compute magnitude
+		// TODO: Add to buffer
+		printf("%.2f\n", mag);
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SAMPLE_PERIOD));
+	}
+}
+
+void compute_task(void* args) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	for(;;) {
+		// TODO: Get buffer size
+		// TODO: Compute SD(Standard Deviation)
+
+		// TODO: Count step and empty the queue
+		// TODO: Get sample, remove it from queue
+		// TODO: Check: sample > mean, mean + SD_K * sd
+		//              and time between last step and this sample > MIN_STEP_TIME
+		//      Step found: increase step count
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
 	}
 }
 
@@ -47,6 +73,7 @@ void app_main() {
 
 	// Initialise I2C bus and the MPU6050
 	I2C_Init(SDA_PIN, SCL_PIN);
-	xTaskCreate(task, "PrintTask", 2048, NULL, 10, NULL);
+	xTaskCreate(sample_task,  "SampleTask",  2048, NULL, 10, NULL);
+	xTaskCreate(compute_task, "ComputeTask", 2048, NULL, 10, NULL);
 }
 
