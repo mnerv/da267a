@@ -1,7 +1,7 @@
 /**
  * @file   main.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
- * @brief  Circular Buffers tests
+ * @brief  Lab02 - Circular Buffers
  * @date   2021-09-13
  *
  * @copyright Copyright (c) 2021

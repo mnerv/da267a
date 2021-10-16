@@ -1,7 +1,7 @@
 /**
  * @file   main.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
- * @brief  DA267A Lab03 Sound Game with ESP32.
+ * @brief  Lab03 - Sound Game with ESP32.
  * @date   2021-09-28
  *
  * @copyright Copyright (c) 2021

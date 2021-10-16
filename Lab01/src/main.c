@@ -1,7 +1,7 @@
 /**
  * @file   main.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
- * @brief  Reaction game implementation with two buttons and two LEDs.
+ * @brief  Lab01 - Reaction game implementation with two buttons and two LEDs.
  * @date   2021-09-08
  *
  * @copyright Copyright (c) 2021

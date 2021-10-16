@@ -1,7 +1,7 @@
 /**
  * @file   main.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
- * @brief  DA267A Lab04.
+ * @brief  Lab04 - Doubly and Singly Linked List
  * @date   2021-10-03
  *
  * @copyright Copyright (c) 2021
