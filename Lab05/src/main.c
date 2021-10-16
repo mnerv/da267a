@@ -30,7 +30,8 @@ void task(void* arg) {
 		MPU6050_Update(&mpu);
 		// Print Acceleration data
 		printf("%.2f, %.2f, %.2f\n", mpu.accx, mpu.accy, mpu.accz);
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
+		ets_delay_us(500000);                                  // Work for 0.5 s
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));  // Sleep for 2s
 	}
 }
 
