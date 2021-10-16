@@ -9,12 +9,17 @@
 #include "MPU6050.h"
 #include "I2CUtil.h"
 
-#define AFS_SEL0_LSB 16384.f  //  2g
-#define AFS_SEL1_LSB  8192.f  //  4g
-#define AFS_SEL2_LSB  4096.f  //  8g
-#define AFS_SEL3_LSB  2048.f  // 16g
+#define AFS_SEL0_LSB 16384.0f  //    2 g
+#define AFS_SEL1_LSB  8192.0f  //    4 g
+#define AFS_SEL2_LSB  4096.0f  //    8 g
+#define AFS_SEL3_LSB  2048.0f  //   16 g
+#define FS_SEL0_LSB    131.0f  //  250 °/s
+#define FS_SEL1_LSB     65.5f  //  500 °/s
+#define FS_SEL2_LSB     32.8f  // 1000 °/s
+#define FS_SEL3_LSB     16.4f  // 2000 °/s
 
-float selected_lsb = AFS_SEL0_LSB;
+float accLSB  = AFS_SEL0_LSB;
+float gyroLSB = FS_SEL0_LSB;
 uint8_t localbuffer;
 
 void MPU6050_Config(uint8_t regster, uint8_t data) {
@@ -25,19 +30,22 @@ void MPU6050_AccConfig(uint8_t flag) {
 	uint8_t accConfig = (flag & 0b00011000) >> 3;
 	switch(accConfig) {
 		case 0:
-			selected_lsb = AFS_SEL0_LSB;
+			accLSB = AFS_SEL0_LSB;
 			break;
 		case 1:
-			selected_lsb = AFS_SEL1_LSB;
+			accLSB = AFS_SEL1_LSB;
 			break;
 		case 2:
-			selected_lsb = AFS_SEL2_LSB;
+			accLSB = AFS_SEL2_LSB;
 			break;
 		case 3:
-			selected_lsb = AFS_SEL3_LSB;
+			accLSB = AFS_SEL3_LSB;
 			break;
 	}
 	I2C_Write(MPU6050_ADDR, MPU6050_ACCEL_CONFIG, flag);
+}
+
+void MPU6050_GyroConfig(uint8_t flag) {
 }
 
 void MPU6050_Update(MPU6050* mpu6050) {
@@ -72,9 +80,11 @@ void MPU6050_Update(MPU6050* mpu6050) {
 	I2C_Read(MPU6050_ADDR, MPU6050_TEMP_OUT_H, &localbuffer, 1);
 	mpu6050->raw_temp |= (int16_t)localbuffer << 8;
 
-	mpu6050->accx = (float)mpu6050->raw_accx / selected_lsb;
-	mpu6050->accy = (float)mpu6050->raw_accy / selected_lsb;
-	mpu6050->accz = (float)mpu6050->raw_accz / selected_lsb;
-
+	mpu6050->accx  = (float)mpu6050->raw_accx  / accLSB;
+	mpu6050->accy  = (float)mpu6050->raw_accy  / accLSB;
+	mpu6050->accz  = (float)mpu6050->raw_accz  / accLSB;
+	mpu6050->gyrox = (float)mpu6050->raw_gyrox / gyroLSB;
+	mpu6050->gyroy = (float)mpu6050->raw_gyroy / gyroLSB;
+	mpu6050->gyroz = (float)mpu6050->raw_gyroz / gyroLSB;
 }
 

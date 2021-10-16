@@ -18,7 +18,7 @@ void I2C_Init(int32_t sda, int32_t scl) {
 		.scl_io_num       = scl,
 		.sda_pullup_en    = GPIO_PULLUP_ENABLE,
 		.scl_pullup_en    = GPIO_PULLUP_ENABLE,
-		.master.clk_speed = 100000  // 100kHz
+		.master.clk_speed = 100000               // Hz
 	};
 	esp_err_t err = i2c_param_config(I2C_NUM_0, &config);
 	ESP_ERROR_CHECK(err);
@@ -37,7 +37,7 @@ void I2C_Write(uint8_t address, uint8_t reg, uint8_t data) {
 	ESP_ERROR_CHECK(err);
 	err = i2c_master_write_byte(cmd, data, 1);  // Write data
 	ESP_ERROR_CHECK(err);
-	err = i2c_master_stop(cmd);                // End command
+	err = i2c_master_stop(cmd);                 // End command
 	ESP_ERROR_CHECK(err);
 
 	err = i2c_master_cmd_begin(I2C_NUM_0, cmd, RATE / portTICK_RATE_MS);

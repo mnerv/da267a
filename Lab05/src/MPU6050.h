@@ -63,6 +63,7 @@ typedef struct {
 
 void MPU6050_Config(uint8_t regster, uint8_t data);
 void MPU6050_AccConfig(uint8_t flag);
+void MPU6050_GyroConfig(uint8_t flag);
 void MPU6050_Update(MPU6050* mpu6050);
 
 #ifdef __cplusplus
