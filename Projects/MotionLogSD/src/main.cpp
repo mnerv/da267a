@@ -2,7 +2,7 @@
  * @file   main.c
  * @author Pratchaya Khansomboon (pratchaya.k.git@gmail.com)
  * @brief  Log Motion data to SD card
- * @date   2021-10-12
+ * @date   2021-10-17
  *
  * @copyright Copyright (c) 2021
  */
@@ -32,19 +32,34 @@ extern "C" auto app_main() -> void;
 #define MOSI_PIN 18
 #define SCLK_PIN  5
 #define CS_PIN   27
+#define LED_PIN  13
+
+#define SAMPLE_PRIORITY  10
+#define LOG_PRIORITY     10
+#define SAMPLE_PERIOD   166  // ms
+#define COMPUTE_PERIOD  100  // ms
+#define BUFFER_SIZE      64
+
 
 #define MOUNT_POINT "/DATALOGGER"
+auto DATAFILE = MOUNT_POINT"/data.csv";
 
-#define SAMPLE_PRIORITY   10
-#define LOG_PRIORITY      10
-#define SAMPLE_PERIOD    166  // ms
-#define COMPUTE_PERIOD   100  // ms
-#define BUFFER_SIZE       64
+struct DataFormat {
+    uint32_t time;
+    float ax, ay, az;
+};
 
 // Global buffer
-BufferQ<float, BUFFER_SIZE> buffer;
+BufferQ<DataFormat, BUFFER_SIZE> buffer;
+sdmmc_card_t *card = nullptr;
+FILE* file         = nullptr;
 float data[BUFFER_SIZE];
-bool isLogging = false;
+bool lastIsLogging = false;
+bool isLogging     = false;
+
+uint32_t time_ms() {
+    return xTaskGetTickCount() * portTICK_PERIOD_MS;
+}
 
 void sample_task(void* args) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -58,16 +73,27 @@ void sample_task(void* args) {
         float mag = sqrtf(mpu.accx * mpu.accx +
                           mpu.accy * mpu.accy +
                           mpu.accz * mpu.accz);  // Compute magnitude
-        if (mag > 2.f) isLogging = !isLogging;
+        lastIsLogging = isLogging;
+        if (mag > 2.f) {
+            isLogging = !isLogging;
+            if (isLogging) {
+                file = fopen(DATAFILE, "a");
+                if (file != nullptr) fprintf(file, "time,x,y,z\n");
+            } else {
+                if (file != nullptr) {
+                    fclose(file);
+                    file = nullptr;
+                }
+            }
+        }
         // Add to buffer
-        buffer.Enqueue(mag);
+        buffer.Enqueue({time_ms(), mpu.accx, mpu.accy, mpu.accz});
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SAMPLE_PERIOD));
     }
 }
 
 void log_task(void* args) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    sdmmc_card_t *card;
 
     esp_vfs_fat_mount_config_t mountConfig = {
         .format_if_mount_failed = false,
@@ -97,18 +123,22 @@ void log_task(void* args) {
     ESP_ERROR_CHECK(err);
     sdmmc_card_print_info(stdout, card);  // Print SD card info
 
-    auto filename = MOUNT_POINT"/hello.txt";
-    FILE* file = fopen(filename, "w");
-    if (file != nullptr) {
-        fprintf(file, "Hello %s!\n", card->cid.name);
-        fclose(file);
-    }
+    //FILE* file = fopen(filename, "a");
+    //if (file != nullptr) {
+    //    fprintf(file, "Hello %s!\n", card->cid.name);
+    //    fclose(file);
+    //}
 
     for(;;) {
+        gpio_set_level(gpio_num_t(LED_PIN), uint8_t(isLogging));
         int32_t totalSample = 0;
+
         while(!buffer.IsEmpty()) {
             auto const value = buffer.Dequeue();
-            printf("%.2f\n", value);
+            //printf("%.2f\n", value);
+            if (file != nullptr && isLogging) {
+                fprintf(file, "%u,%.3f,%.3f,%.3f\n", value.time, value.ax, value.ay, value.az);
+            }
             totalSample++;
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
@@ -130,6 +160,14 @@ auto app_main() -> void {
 
     // Initialise I2C bus and the MPU6050
     I2C_Init(SDA_PIN, SCL_PIN);
+
+    // Initialise LED Pin
+    gpio_config_t config;
+    config.pin_bit_mask = uint64_t(1) << LED_PIN;
+    config.mode         = gpio_mode_t(GPIO_MODE_OUTPUT);
+    config.pull_up_en   = GPIO_PULLUP_DISABLE;
+    config.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    gpio_config(&config);
 
     xTaskCreate(sample_task, "SampleTask", 2048, NULL, SAMPLE_PRIORITY, nullptr);
     xTaskCreate(log_task,    "LogTask",    5120, NULL, LOG_PRIORITY,    nullptr);
