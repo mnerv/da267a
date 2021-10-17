@@ -13,20 +13,27 @@
 #include "esp_task_wdt.h"
 #include "esp_pm.h"
 
+#include "BufferQueue.h"
 #include "I2CUtil.h"
 #include "MPU6050.h"
 
 #define SDA_PIN 23
 #define SCL_PIN 22
 
-#define SAMPLE_PERIOD  166  // ms
-#define COMPUTE_PERIOD 100  // ms
-#define BUFFER_SIZE    10
+#define SAMPLE_PRIORITY  10
+#define COMPUTE_PRIORITY 10
+#define SAMPLE_PERIOD    33  // ms
+#define COMPUTE_PERIOD   100  // ms
 
+#define BUFFER_SIZE    16
 // Step-Detection algorithm constant values
-#define MIN_SD          0  // Minimum Standard Deviation
-#define SD_K            0  // Standard deviation constant
-#define MIN_STEP_TIME   0  // Minimum time between each step
+#define MIN_SD         0    // Minimum Standard Deviation
+#define SD_K           0    // Standard deviation constant
+#define MIN_STEP_TIME  0    // Minimum time between each step
+
+// Global buffer
+BufferQ_t buffer;
+float data[BUFFER_SIZE];
 
 void sample_task(void* args) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -40,8 +47,8 @@ void sample_task(void* args) {
 		float mag = sqrtf(mpu.accx * mpu.accx +
 		                  mpu.accy * mpu.accy +
 		                  mpu.accz * mpu.accz);  // Compute magnitude
-		// TODO: Add to buffer
-		printf("%.2f\n", mag);
+		// Add to buffer
+		BufferQ_Enqueue(&buffer, mag);
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SAMPLE_PERIOD));
 	}
 }
@@ -56,7 +63,12 @@ void compute_task(void* args) {
 		// TODO: Get sample, remove it from queue
 		// TODO: Check: sample > mean, mean + SD_K * sd
 		//              and time between last step and this sample > MIN_STEP_TIME
-		//      Step found: increase step count
+		//              Step found: increase step count
+		int32_t totalSample = 0;
+		while(!BufferQ_Empty(&buffer)) {
+			printf("%.2f\n", BufferQ_Dequeue(&buffer));
+			totalSample++;
+		}
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
 	}
 }
@@ -73,7 +85,9 @@ void app_main() {
 
 	// Initialise I2C bus and the MPU6050
 	I2C_Init(SDA_PIN, SCL_PIN);
-	xTaskCreate(sample_task,  "SampleTask",  2048, NULL, 10, NULL);
-	xTaskCreate(compute_task, "ComputeTask", 2048, NULL, 10, NULL);
+	BufferQ_Init(&buffer, data, BUFFER_SIZE);
+
+	xTaskCreate(sample_task,  "SampleTask",  2048, NULL, SAMPLE_PRIORITY,  NULL);
+	xTaskCreate(compute_task, "ComputeTask", 2048, NULL, COMPUTE_PRIORITY, NULL);
 }
 
