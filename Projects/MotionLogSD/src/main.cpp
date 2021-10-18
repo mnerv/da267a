@@ -33,6 +33,7 @@ extern "C" auto app_main() -> void;
 #define SCLK_PIN  5
 #define CS_PIN   27
 #define LED_PIN  13
+#define BTN_PIN  12
 
 #define SAMPLE_PRIORITY  10
 #define LOG_PRIORITY     10
@@ -47,6 +48,8 @@ auto DATAFILE = MOUNT_POINT"/data.csv";
 struct DataFormat {
     uint32_t time;
     float ax, ay, az;
+    float gx, gy, gz;
+    float temp;
 };
 
 // Global buffer
@@ -54,7 +57,6 @@ BufferQ<DataFormat, BUFFER_SIZE> buffer;
 sdmmc_card_t *card = nullptr;
 FILE* file         = nullptr;
 float data[BUFFER_SIZE];
-bool lastIsLogging = false;
 bool isLogging     = false;
 
 uint32_t time_ms() {
@@ -68,17 +70,25 @@ void sample_task(void* args) {
     MPU6050_Config(MPU6050_SMPLRT_DIV, 250);
     MPU6050_AccConfig(0x00);
 
+    bool prevState = false;
+    bool currState = false;
+
+    prevState = currState;
+    currState = !gpio_get_level(gpio_num_t(BTN_PIN));
     for(;;) {
         MPU6050_Update(&mpu);  // Get accelerations
+        prevState = currState;
+        currState = !gpio_get_level(gpio_num_t(BTN_PIN));
+
         float mag = sqrtf(mpu.accx * mpu.accx +
                           mpu.accy * mpu.accy +
                           mpu.accz * mpu.accz);  // Compute magnitude
-        lastIsLogging = isLogging;
-        if (mag > 2.f) {
+        if (currState && !prevState) {
             isLogging = !isLogging;
+            gpio_set_level(gpio_num_t(LED_PIN), isLogging);
             if (isLogging) {
                 file = fopen(DATAFILE, "a");
-                if (file != nullptr) fprintf(file, "time,x,y,z\n");
+                if (file != nullptr) fprintf(file, "time,ax,ay,az,gx,gy,gz,temp\n");
             } else {
                 if (file != nullptr) {
                     fclose(file);
@@ -87,7 +97,12 @@ void sample_task(void* args) {
             }
         }
         // Add to buffer
-        buffer.Enqueue({time_ms(), mpu.accx, mpu.accy, mpu.accz});
+        buffer.Enqueue({
+                time_ms(),
+                mpu.accx,  mpu.accy,  mpu.accz,
+                mpu.gyrox, mpu.gyroy, mpu.gyroz,
+                mpu.temp
+            });
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SAMPLE_PERIOD));
     }
 }
@@ -95,6 +110,7 @@ void sample_task(void* args) {
 void log_task(void* args) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
+    // Refer to https://github.com/espressif/esp-idf/blob/master/examples/storage/sd_card/sdspi/main/sd_card_example_main.c
     esp_vfs_fat_mount_config_t mountConfig = {
         .format_if_mount_failed = false,
         .max_files              = 5,
@@ -123,23 +139,14 @@ void log_task(void* args) {
     ESP_ERROR_CHECK(err);
     sdmmc_card_print_info(stdout, card);  // Print SD card info
 
-    //FILE* file = fopen(filename, "a");
-    //if (file != nullptr) {
-    //    fprintf(file, "Hello %s!\n", card->cid.name);
-    //    fclose(file);
-    //}
-
     for(;;) {
-        gpio_set_level(gpio_num_t(LED_PIN), uint8_t(isLogging));
-        int32_t totalSample = 0;
-
         while(!buffer.IsEmpty()) {
-            auto const value = buffer.Dequeue();
-            //printf("%.2f\n", value);
+            auto const data = buffer.Dequeue();
             if (file != nullptr && isLogging) {
-                fprintf(file, "%u,%.3f,%.3f,%.3f\n", value.time, value.ax, value.ay, value.az);
+                fprintf(file, "%u,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+                        data.time, data.ax, data.ay, data.az,
+                        data.gx,   data.gy, data.gz, data.temp);
             }
-            totalSample++;
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
     }
@@ -167,7 +174,12 @@ auto app_main() -> void {
     config.mode         = gpio_mode_t(GPIO_MODE_OUTPUT);
     config.pull_up_en   = GPIO_PULLUP_DISABLE;
     config.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    gpio_config(&config);
+    ESP_ERROR_CHECK(gpio_config(&config));
+    config.pin_bit_mask = uint64_t(1) << BTN_PIN;
+    config.mode         = gpio_mode_t(GPIO_MODE_INPUT);
+    config.pull_down_en = GPIO_PULLDOWN_ENABLE;
+    config.pull_up_en   = GPIO_PULLUP_DISABLE;
+    ESP_ERROR_CHECK(gpio_config(&config));
 
     xTaskCreate(sample_task, "SampleTask", 2048, NULL, SAMPLE_PRIORITY, nullptr);
     xTaskCreate(log_task,    "LogTask",    5120, NULL, LOG_PRIORITY,    nullptr);
