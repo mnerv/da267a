@@ -23,6 +23,9 @@ bool BufferQ_Empty(BufferQ_t* queue) {
 bool BufferQ_Full(BufferQ_t* queue) {
 	return queue->entries == queue->max;
 }
+int32_t BufferQ_Count(BufferQ_t* queue) {
+	return queue->entries;
+}
 
 bool BufferQ_Enqueue(BufferQ_t* queue, float value) {
 	if (BufferQ_Full(queue)) return false;
@@ -34,11 +37,19 @@ bool BufferQ_Enqueue(BufferQ_t* queue, float value) {
 }
 
 float BufferQ_Dequeue(BufferQ_t* queue) {
-	if (BufferQ_Empty(queue)) return BUFFER_EMPTY;
 	float* data = (float*)queue->data;
 	float value = data[queue->head];
-	queue->head = (queue->head + 1) % queue->max;
-	queue->entries--;
+	if (!BufferQ_Empty(queue)) {
+		queue->head = (queue->head + 1) % queue->max;
+		queue->entries--;
+	}
 	return value;
+}
+
+float BufferQ_Peek(BufferQ_t* queue, int32_t pos) {
+	float* data = (float*)queue->data;
+	if (-1 < pos && pos < queue->max)
+		return data[pos];
+	return data[queue->head];
 }
 

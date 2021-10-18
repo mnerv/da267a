@@ -22,18 +22,18 @@
 
 #define SAMPLE_PRIORITY  10
 #define COMPUTE_PRIORITY 10
-#define SAMPLE_PERIOD    33  // ms
-#define COMPUTE_PERIOD   100  // ms
+#define SAMPLE_PERIOD    166  // ms
+#define COMPUTE_PERIOD   500  // ms
 
 #define BUFFER_SIZE    16
 // Step-Detection algorithm constant values
-#define MIN_SD         0    // Minimum Standard Deviation
-#define SD_K           0    // Standard deviation constant
-#define MIN_STEP_TIME  0    // Minimum time between each step
+#define SD_MIN         0.270  // Minimum Standard Deviation
+#define SD_K           0.600  // Standard deviation constant
 
 // Global buffer
 BufferQ_t buffer;
 float data[BUFFER_SIZE];
+int32_t stepCount = 0;
 
 void sample_task(void* args) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -56,19 +56,34 @@ void sample_task(void* args) {
 void compute_task(void* args) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	for(;;) {
-		// TODO: Get buffer size
-		// TODO: Compute SD(Standard Deviation)
+		if (BufferQ_Full(&buffer)) {
+			// Get buffer size
+			int32_t size = buffer.entries;
+			// Compute SD(Standard Deviation)
+			float sum    = 0.f;
+			int32_t head = buffer.head;
+			for (int32_t i = 0; i < size; i++) {
+				float* data = (float*)buffer.data;
+				sum += data[head];
+				head = (head + buffer.max - 1) % buffer.max;
+			}
+			float mean = sum / (float)size;
+			float sd   = sqrtf(mean / (float)size);
+			if (sd < SD_MIN) sd = SD_MIN;
 
-		// TODO: Count step and empty the queue
-		// TODO: Get sample, remove it from queue
-		// TODO: Check: sample > mean, mean + SD_K * sd
-		//              and time between last step and this sample > MIN_STEP_TIME
-		//              Step found: increase step count
-		int32_t totalSample = 0;
-		while(!BufferQ_Empty(&buffer)) {
-			printf("%.2f\n", BufferQ_Dequeue(&buffer));
-			totalSample++;
+			// Count step and empty the queue
+			while(!BufferQ_Empty(&buffer)) {
+				// Get sample, remove it from queue
+				float value = BufferQ_Dequeue(&buffer);
+				// Check: sample > mean + SD_K * sd
+				//        and time between last step and this sample > MIN_STEP_TIME
+				//        Step found: increase step count
+				if (value > mean + SD_K * sd) {
+					stepCount++;
+				}
+			}
 		}
+		printf("Step count: %d\n", stepCount);
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
 	}
 }

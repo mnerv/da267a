@@ -16,22 +16,23 @@
 extern "C" {
 #endif
 
-#define BUFFER_EMPTY INT32_MIN
-
 typedef struct {
 	int32_t head;
 	int32_t tail;
 	int32_t entries;
 	int32_t max;
-	void*  data;
+	void*   data;
 } BufferQ_t;
 
 void BufferQ_Init(BufferQ_t* queue, void* data, int32_t max);
 bool BufferQ_Empty(BufferQ_t* queue);
 bool BufferQ_Full(BufferQ_t* queue);
+int32_t BufferQ_Count(BufferQ_t* queue);
 
 bool BufferQ_Enqueue(BufferQ_t* queue, float value);
 float BufferQ_Dequeue(BufferQ_t* queue);
+
+float BufferQ_Peek(BufferQ_t* queue, int32_t pos);
 
 #ifdef __cplusplus
 }
