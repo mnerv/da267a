@@ -25,10 +25,11 @@
 #define SAMPLE_PERIOD    166  // ms
 #define COMPUTE_PERIOD   500  // ms
 
-#define BUFFER_SIZE    16
+#define BUFFER_SIZE    32
 // Step-Detection algorithm constant values
-#define SD_MIN         0.270  // Minimum Standard Deviation
-#define SD_K           0.600  // Standard deviation constant
+#define SD_MIN         0.007  // Minimum Standard Deviation
+#define SD_K           2.000  // Standard deviation constant
+#define MIN_STEP_TIME  120    // ms
 
 // Global buffer
 BufferQ_t buffer;
@@ -56,21 +57,28 @@ void sample_task(void* args) {
 void compute_task(void* args) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	for(;;) {
-		if (BufferQ_Full(&buffer)) {
+		if (!BufferQ_Empty(&buffer)) {
 			// Get buffer size
 			int32_t size = buffer.entries;
 			// Compute SD(Standard Deviation)
-			float sum    = 0.f;
-			int32_t head = buffer.head;
+			float sum     = 0.f;
+			float sumMean = 0.f;
+			int32_t head  = buffer.head;
+			float* data   = (float*)buffer.data;
 			for (int32_t i = 0; i < size; i++) {
-				float* data = (float*)buffer.data;
 				sum += data[head];
 				head = (head + buffer.max - 1) % buffer.max;
 			}
 			float mean = sum / (float)size;
-			float sd   = sqrtf(mean / (float)size);
+			head = buffer.head;
+			for (int32_t i = 0; i < size; i++) {
+				sumMean += (data[head] - mean) * (data[head] - mean);
+				head = (head + buffer.max - 1) % buffer.max;
+			}
+			float sd = sqrtf(sumMean / (float)size);
 			if (sd < SD_MIN) sd = SD_MIN;
 
+			uint32_t lastStepTime = 0;
 			// Count step and empty the queue
 			while(!BufferQ_Empty(&buffer)) {
 				// Get sample, remove it from queue
@@ -80,10 +88,11 @@ void compute_task(void* args) {
 				//        Step found: increase step count
 				if (value > mean + SD_K * sd) {
 					stepCount++;
+					lastStepTime = 0;
 				}
 			}
+			printf("Step count: %d, SD: %.2f, m: %.2f, m+k*sd: %.2f\n", stepCount, sd, mean, mean + SD_K * sd);
 		}
-		printf("Step count: %d\n", stepCount);
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
 	}
 }
