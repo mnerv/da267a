@@ -25,9 +25,9 @@
 #define SAMPLE_PERIOD    166  // ms
 #define COMPUTE_PERIOD   500  // ms
 
-#define BUFFER_SIZE    32
+#define BUFFER_SIZE    16
 // Step-Detection algorithm constant values
-#define SD_MIN         0.007  // Minimum Standard Deviation
+#define SD_MIN         0.008  // Minimum Standard Deviation
 #define SD_K           2.000  // Standard deviation constant
 #define MIN_STEP_TIME  120    // ms
 
@@ -61,34 +61,36 @@ void compute_task(void* args) {
 			// Get buffer size
 			int32_t size = buffer.entries;
 			// Compute SD(Standard Deviation)
-			float sum     = 0.f;
-			float sumMean = 0.f;
-			int32_t head  = buffer.head;
-			float* data   = (float*)buffer.data;
-			for (int32_t i = 0; i < size; i++) {
-				sum += data[head];
+			float mean  = 0.f;
+			float sd    = 0.f;
+			float* data = (float*)buffer.data;
+			for (int32_t i = 0, head = buffer.head; i < size; i++) {
+				mean += data[head];
+				head  = (head + buffer.max - 1) % buffer.max;
+			}
+			mean = mean / (float)size;
+			for (int32_t i = 0, head = buffer.head; i < size; i++) {
+				sd  += ((data[head] - mean) * (data[head] - mean));
 				head = (head + buffer.max - 1) % buffer.max;
 			}
-			float mean = sum / (float)size;
-			head = buffer.head;
-			for (int32_t i = 0; i < size; i++) {
-				sumMean += (data[head] - mean) * (data[head] - mean);
-				head = (head + buffer.max - 1) % buffer.max;
-			}
-			float sd = sqrtf(sumMean / (float)size);
-			if (sd < SD_MIN) sd = SD_MIN;
+			sd = sqrtf(sd / (float)size);
+			if (sd < SD_MIN) sd = SD_MIN;  // Check the minimum SD value
 
-			uint32_t lastStepTime = 0;
+			// For keeping track the minimum step time
+			uint32_t lastStepTime = -MIN_STEP_TIME;
+			uint32_t currStepTime = 0;
 			// Count step and empty the queue
 			while(!BufferQ_Empty(&buffer)) {
 				// Get sample, remove it from queue
-				float value = BufferQ_Dequeue(&buffer);
+				float value   = BufferQ_Dequeue(&buffer);
+				currStepTime += SAMPLE_PERIOD;
 				// Check: sample > mean + SD_K * sd
 				//        and time between last step and this sample > MIN_STEP_TIME
 				//        Step found: increase step count
-				if (value > mean + SD_K * sd) {
+				if (value > mean + SD_K * sd &&
+					currStepTime - lastStepTime > MIN_STEP_TIME) {
 					stepCount++;
-					lastStepTime = 0;
+					lastStepTime = currStepTime;
 				}
 			}
 			printf("Step count: %d, SD: %.2f, m: %.2f, m+k*sd: %.2f\n", stepCount, sd, mean, mean + SD_K * sd);
