@@ -10,18 +10,20 @@
 
 #include "driver/gpio.h"
 #include "esp_task_wdt.h"
+#include "LinkedList.h"
 
 #define BUTTON_PIN        12
 #define DEBOUNCE_DELAY    125000  // microseconds
 #define INTR_FLAG_DEFAULT 0
 
-#define LED_A_PIN 27
-#define LED_B_PIN 33
-#define LED_C_PIN 15
+#define LED_A_PIN     27
+#define LED_B_PIN     33
+#define LED_C_PIN     15
 #define ELEVATOR_SIZE 4
 
 #define TRAVEL_NEED_SIZE   50
 #define PUSH_TIME_DELAY_US 250000  // microseconds
+#define TRAVEL_TIME        1000    // ms
 
 typedef struct {
 	int32_t origin;
@@ -29,35 +31,42 @@ typedef struct {
 } TravelNeed;
 
 uint64_t lastPushTime = 0;
-int32_t  levelCounter = 0;
+int32_t travelNeedIndex = 0;
 TravelNeed travelNeeds[TRAVEL_NEED_SIZE];
+LinkedList_t queue;
 
 void on_push(void* arg) {
 	uint64_t now = esp_timer_get_time();
 	gpio_intr_disable(BUTTON_PIN);
 	if ((now - lastPushTime) > DEBOUNCE_DELAY) {
-		// TODO: Handle when button is pushed
+		// Add next data to queue
+		travelNeedIndex = (travelNeedIndex + 1) % TRAVEL_NEED_SIZE;
+		LinkedListQ_Enqueue(&queue, travelNeedIndex);
 		lastPushTime = now;
-
-		TravelNeed travel = travelNeeds[levelCounter];
-		uint32_t level    = levelCounter % ELEVATOR_SIZE;
-
-		if (level == 0) {
-			gpio_set_level(LED_A_PIN, 1);
-			gpio_set_level(LED_B_PIN, 0);
-			gpio_set_level(LED_C_PIN, 0);
-		} else if (level == 1 || level == 3) {
-			gpio_set_level(LED_A_PIN, 0);
-			gpio_set_level(LED_B_PIN, 1);
-			gpio_set_level(LED_C_PIN, 0);
-		} else {
-			gpio_set_level(LED_A_PIN, 0);
-			gpio_set_level(LED_B_PIN, 0);
-			gpio_set_level(LED_C_PIN, 1);
-		}
-		levelCounter++;
 	}
 	gpio_intr_enable(BUTTON_PIN);
+}
+
+void set_light(int32_t level) {
+	if (level == 0) {
+		gpio_set_level(LED_A_PIN, 1);
+		gpio_set_level(LED_B_PIN, 0);
+		gpio_set_level(LED_C_PIN, 0);
+	} else if (level == 1 || level == 3) {
+		gpio_set_level(LED_A_PIN, 0);
+		gpio_set_level(LED_B_PIN, 1);
+		gpio_set_level(LED_C_PIN, 0);
+	} else {
+		gpio_set_level(LED_A_PIN, 0);
+		gpio_set_level(LED_B_PIN, 0);
+		gpio_set_level(LED_C_PIN, 1);
+	}
+}
+
+void off_all() {
+	gpio_set_level(LED_A_PIN, 0);
+	gpio_set_level(LED_B_PIN, 0);
+	gpio_set_level(LED_C_PIN, 0);
 }
 
 void app_main() {
@@ -131,10 +140,28 @@ void app_main() {
 	config.intr_type     = GPIO_INTR_DISABLE;
 	ESP_ERROR_CHECK(gpio_config(&config));
 
+	LinkedListQ_Init(&queue);
+	TravelNeed current = travelNeeds[travelNeedIndex];
+	int32_t level      = current.origin;
+	int32_t index      = travelNeedIndex;
 	for (;;) {
-		// TODO: Simulate elevator
-		printf("Hello, World!\n");
-		vTaskDelay(pdMS_TO_TICKS(250));
+		printf("index: %d, level: %d, origin: %d, destination: %d\n",
+		       index, level, current.origin, current.dest);
+		set_light(level);
+		vTaskDelay(pdMS_TO_TICKS(TRAVEL_TIME));
+		if (level != current.dest) {
+			if (current.origin - current.dest < 0)
+				level = (level + 1) % ELEVATOR_SIZE;
+			else
+				level = (level + ELEVATOR_SIZE - 1) % ELEVATOR_SIZE;
+		} else if (!LinkedListQ_Empty(&queue)) {
+			index = LinkedListQ_Dequeue(&queue);
+			current = travelNeeds[index];
+			level = current.origin;
+			off_all();
+			vTaskDelay(pdMS_TO_TICKS(2000));
+		}
 	}
+	LinkedListQ_Clean(&queue);
 }
 
