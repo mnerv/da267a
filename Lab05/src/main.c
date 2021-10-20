@@ -22,10 +22,10 @@
 #define SDA_PIN 23
 #define SCL_PIN 22
 
-#define SAMPLE_PRIORITY  10   // For xTaskCreate
+#define SAMPLE_PRIORITY  20   // For xTaskCreate
 #define COMPUTE_PRIORITY 10   // For xTaskCreate
 #define SAMPLE_PERIOD	 166  // ms
-#define COMPUTE_PERIOD	 500  // ms
+#define COMPUTE_PERIOD	 1000 // ms
 
 #define BUTTON_PIN            12
 #define LED_PIN               13
@@ -38,7 +38,6 @@
 #define SD_K          1.800  // Standard deviation constant
 #define MIN_STEP_TIME 120    // ms
 #define STEP_GOAL     10
-
 
 // Global buffer
 BufferQ_t buffer;
@@ -92,20 +91,19 @@ void compute_task(void* args) {
 			uint32_t lastStepTime = -MIN_STEP_TIME;
 			uint32_t currStepTime = 0;
 			// Count step and empty the queue
-			while(!BufferQ_Empty(&buffer)) {
+			for (int32_t i = 0; i < size; i++) {
 				// Get sample, remove it from queue
 				float value   = BufferQ_Dequeue(&buffer);
 				currStepTime += SAMPLE_PERIOD;
 				// Check: sample > mean + SD_K * sd
 				//        and time between last step and this sample > MIN_STEP_TIME
 				//        Step found: increase step count
-				if (value > mean + SD_K * sd &&
-					currStepTime - lastStepTime > MIN_STEP_TIME) {
+				if (value > mean + SD_K * sd && currStepTime - lastStepTime > MIN_STEP_TIME) {
 					stepCount++;
 					lastStepTime = currStepTime;
 				}
 			}
-			printf("Step count: %d, SD: %.2f, m: %.2f, m+k*sd: %.2f\n", stepCount, sd, mean, mean + SD_K * sd);
+			printf("Step count: %d, SD: %.2f, m: %.2f, m+k*sd: %.2f, size: %d\n", stepCount, sd, mean, mean + SD_K * sd, size);
 		}
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(COMPUTE_PERIOD));
 	}
